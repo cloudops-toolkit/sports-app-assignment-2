@@ -1,0 +1,184 @@
+name: Infrastructure deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Project Name'
+        required: true
+        type: string
+        default: sports-infra
+      environment:
+        description: 'Environment (dev/qa/prod)'
+        required: true
+        type: string
+      deployment_type:
+        description: 'Deployment Type (Temporary)'
+        required: true
+        type: choice
+        options:
+          - Apply
+          - Destroy
+        default: Apply
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  project: ${{ github.event.inputs.project }}
+  environment: ${{ github.event.inputs.environment }}
+  deployment_type: ${{ github.event.inputs.deployment_type }}
+
+jobs:
+  build:
+    name: 'Build and Test'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    env:
+      AWS_PRIMARY_REGION: ${{ vars.AWS_PRIMARY_REGION }}
+    
+    steps:
+      - name: Checkout code 
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform v1.8.4
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.8.4
+          terraform_wrapper: false
+
+      - name: Setup Terraform version
+        run: terraform --version
+
+      - name: Setup Terraform wrapper path
+        run: which terraform
+
+      - name: Setup Terragrunt version 0.58.13
+        uses: autero1/action-terragrunt@v3
+        with:
+          terragrunt-version: 0.58.13
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.AWS_PRIMARY_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/${{ secrets.ROLE_NAME }}
+          role-session-name: GitHubActionsSession
+
+      - name: Validate Terraform Configurations
+        env:
+          TF_VAR_project: ${{ github.event.inputs.project }}
+          TF_VAR_environment: ${{ github.event.inputs.environment }}
+          AWS_PRIMARY_REGION: ${{ vars.AWS_PRIMARY_REGION }}
+          DBNAME_PREFIX: ${{ secrets.DBNAME_PREFIX }}
+        run: |
+          cd ./infra/environments/${{ github.event.inputs.environment }}
+          terragrunt run-all validate --terragrunt-non-interactive
+
+  deploy:
+    name: 'Terragrunt Init/Plan/Apply'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    needs: build
+    env:
+      AWS_PRIMARY_REGION: ${{ vars.AWS_PRIMARY_REGION }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.AWS_PRIMARY_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/${{ secrets.ROLE_NAME }}
+          role-session-name: GitHubActionsSession
+
+      - name: Setup Terraform v1.8.4
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.8.4
+          terraform_wrapper: false
+
+      - name: Setup Terraform version
+        run: terraform --version
+
+      - name: Setup Terraform wrapper path
+        run: which terraform
+
+      - name: Setup Terragrunt version 0.58.13
+        uses: autero1/action-terragrunt@v3
+        with:
+          terragrunt-version: 0.58.13
+
+      # # **********Debug Steps***********Uncomment when required*********
+      - name: List files in environments directory
+        run: ls -R ./infra/environments
+
+      - name: Debug Config Path
+        env:
+            TF_VAR_environment: ${{ env.environment }}
+        run: |
+          echo "Checking config path..."
+          echo "Expected config path: infra/config/${TF_VAR_environment}.yaml"
+          ls -la infra/config/
+          if [ -f "infra/config/${TF_VAR_environment}.yaml" ]; then
+            echo "Config file exists!"
+          else
+            echo "Config file not found!"
+          fi
+      
+      # Temporary
+      - name: Make destroy_resources.sh executable
+        run: chmod +x ./scripts/destroy-resources.sh
+      
+      # Temporary
+      - name: Determine Action
+        id: action
+        env:
+          deployment_type: ${{ env.deployment_type }}
+        run: |
+          if [ "${{ env.deployment_type }}" == "Apply" ]; then
+            echo "action=apply" >> $GITHUB_ENV
+            echo "::set-output name=action_name::Terragrunt Apply"
+          elif [ "${{ env.deployment_type }}" == "Destroy" ]; then
+            echo "action=destroy" >> $GITHUB_ENV
+            echo "::set-output name=action_name::Terragrunt Destroy"
+          else
+            echo "Invalid deployment type" && exit 1
+          fi
+
+      # Temporary
+      - name: ${{ steps.action.outputs.action_name }}
+        env:
+          TF_VAR_project: ${{ env.project }}
+          TF_VAR_environment: ${{ env.environment }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          DBNAME_PREFIX: ${{ secrets.DBNAME_PREFIX }}
+        run: |
+          echo $TF_VAR_project
+          echo $TF_VAR_environment
+          echo $DBNAME_PREFIX
+          cd ./infra/environments/${{ env.environment }}
+          if [ "${{ env.action }}" == "apply" ]; then
+            terragrunt run-all apply --terragrunt-non-interactive
+          elif [ "${{ env.action }}" == "destroy" ]; then
+            terragrunt run-all destroy --terragrunt-non-interactive
+          fi
+
+      # - name: Terragrunt Apply
+      #   env:
+      #     TF_VAR_project: ${{ env.project }}
+      #     TF_VAR_environment: ${{ env.environment }}
+      #     ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
+      #   run: |
+      #     echo $TF_VAR_project
+      #     echo $TF_VAR_environment
+      #     echo $ACCOUNT_ID
+      #     cd ./infra/environments/${{ env.environment }}
+      #     terragrunt run-all apply --terragrunt-non-interactive
+
+      # # **********Debug Steps***********Uncomment when required*********
+      # - name: List files in environments directory
+      #   run: ls -R ./infra/environments

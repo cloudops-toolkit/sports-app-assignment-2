@@ -1,0 +1,28 @@
+tags:
+  Creator: "sagar"
+  Owner: "sports-fantasy"
+  
+vpc:
+  cidr: "10.0.0.0/16"
+  azs: 
+    - "a"
+    - "b"
+  public_subnets:
+    - "10.0.1.0/24"
+    - "10.0.2.0/24"
+  private_subnets:
+    - "10.0.3.0/24"
+    - "10.0.4.0/24"
+
+rds:
+  backup_retention_period: "7"
+  preferred_backup_window: "02:00-03:00"
+  preferred_maintenance_window: "Sun:04:00-Sun:06:00"
+  deletion_protection: "false"
+
+rds_proxy:
+  enabled: false
+
+redis:
+  node_type: "cache.t3.micro"
+  num_nodes: 1
