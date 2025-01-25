@@ -26,17 +26,12 @@ variable "ecr_repository_url" {
   type = string
 }
 
-variable "rds_proxy_endpoint" {
-  type = string
-  description = "RDS Proxy endpoint"
+variable "container_port" {
+  type    = number
+  default = 8080
 }
 
-variable "db_secret_arn" {
-  type = string
-  description = "ARN of the database credentials secret"
-}
-
-variable "db_cluster_endpoint" {
-  type        = string
-  description = "RDS cluster endpoint"
+variable "image_tag" {
+  type    = string
+  default = "latest"
 }
