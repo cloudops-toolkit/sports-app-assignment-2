@@ -3,7 +3,6 @@ locals {
   environment = get_env("TF_VAR_environment")
   project     = get_env("TF_VAR_project")
   aws_primary_region  = get_env("AWS_PRIMARY_REGION")
-  dbname_prefix = get_env("DBNAME_PREFIX")
 
   # Add validation
   validate_vars = (
