@@ -25,14 +25,12 @@ dependency "security_groups" {
 locals {
   environment = include.root.locals.environment
   project = include.root.locals.project
-  dbname_prefix = include.root.locals.dbname_prefix
 }
 
 inputs = {
   vpc_id               = dependency.vpc.outputs.vpc_id
   private_subnet_ids   = dependency.vpc.outputs.private_subnet_ids
   rds_security_group_id = dependency.security_groups.outputs.rds_sg_id
-  dbname_prefix        = "${local.dbname_prefix}"
   # Environment-specific configurations
   backup_retention_period = try(include.root.locals.config.rds.backup_retention_period, 7)
   preferred_backup_window = try(include.root.locals.config.rds.preferred_backup_window, "03:00-04:00")
