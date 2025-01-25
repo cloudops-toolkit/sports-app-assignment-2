@@ -71,7 +71,6 @@ jobs:
           TF_VAR_project: ${{ github.event.inputs.project }}
           TF_VAR_environment: ${{ github.event.inputs.environment }}
           AWS_PRIMARY_REGION: ${{ vars.AWS_PRIMARY_REGION }}
-          DBNAME_PREFIX: ${{ secrets.DBNAME_PREFIX }}
         run: |
           cd ./infra/environments/${{ github.event.inputs.environment }}
           terragrunt run-all validate --terragrunt-non-interactive
@@ -155,11 +154,9 @@ jobs:
           TF_VAR_project: ${{ env.project }}
           TF_VAR_environment: ${{ env.environment }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          DBNAME_PREFIX: ${{ secrets.DBNAME_PREFIX }}
         run: |
           echo $TF_VAR_project
           echo $TF_VAR_environment
-          echo $DBNAME_PREFIX
           cd ./infra/environments/${{ env.environment }}
           if [ "${{ env.action }}" == "apply" ]; then
             terragrunt run-all apply --terragrunt-non-interactive
