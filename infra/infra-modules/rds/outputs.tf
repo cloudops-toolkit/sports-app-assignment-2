@@ -3,7 +3,7 @@ output "cluster_endpoint" {
 }
 
 output "rds_instance_id" {
-  value = aws_rds_cluster.aurora.endpoint
+  value = aws_rds_cluster.aurora.id
 }
 
 output "reader_endpoint" {

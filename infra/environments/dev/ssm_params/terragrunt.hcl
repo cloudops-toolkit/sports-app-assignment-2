@@ -35,4 +35,5 @@ inputs = {
   session_secret = include.root.locals.config.ssm_params.session_secret
   encoding_key   = include.root.locals.config.ssm_params.encoding_key
   db_secret_arn = dependency.rds.outputs.secrets_manager_secret_arn
+  db_name = "${local.project}_db"
 }
