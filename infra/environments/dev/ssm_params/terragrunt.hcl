@@ -32,8 +32,8 @@ inputs = {
   redis_endpoint = dependency.redis.outputs.redis_endpoint
   db_host        = dependency.rds.outputs.cluster_endpoint
   # These should come from environment-specific config files
-  session_secret = include.root.locals.config.ssm_params.session_secret
-  encoding_key   = include.root.locals.config.ssm_params.encoding_key
+  session_secret = "xxxxxxx"
+  encoding_key   = "xxxxxxx"
   db_secret_arn = dependency.rds.outputs.secrets_manager_secret_arn
   db_name = "${local.project}_db"
 }
