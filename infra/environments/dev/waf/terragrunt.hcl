@@ -7,7 +7,7 @@ terraform {
 }
 
 dependency "cloudfront" {
-  config_path = "../cloudfront-s3"
+  config_path = "../cloudfront"
   mock_outputs = {
     cloudfront_distribution_arn = "arn:aws:cloudfront::123456789012:distribution/EXAMPLE"
   }
