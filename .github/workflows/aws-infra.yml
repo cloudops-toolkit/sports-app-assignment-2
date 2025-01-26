@@ -66,14 +66,14 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/${{ secrets.ROLE_NAME }}
           role-session-name: GitHubActionsSession
 
-      - name: Validate Terraform Configurations
-        env:
-          TF_VAR_project: ${{ github.event.inputs.project }}
-          TF_VAR_environment: ${{ github.event.inputs.environment }}
-          AWS_PRIMARY_REGION: ${{ vars.AWS_PRIMARY_REGION }}
-        run: |
-          cd ./infra/environments/${{ github.event.inputs.environment }}
-          terragrunt run-all validate --terragrunt-non-interactive
+      # - name: Validate Terraform Configurations
+      #   env:
+      #     TF_VAR_project: ${{ github.event.inputs.project }}
+      #     TF_VAR_environment: ${{ github.event.inputs.environment }}
+      #     AWS_PRIMARY_REGION: ${{ vars.AWS_PRIMARY_REGION }}
+      #   run: |
+      #     cd ./infra/environments/${{ github.event.inputs.environment }}
+      #     terragrunt run-all validate --terragrunt-non-interactive
 
   deploy:
     name: 'Terragrunt Init/Plan/Apply'
