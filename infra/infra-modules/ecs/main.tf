@@ -29,7 +29,7 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["EC2"]
   cpu                      = 256  # 0.25 vCPU
   memory                   = 512  # 512MB
-  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  # execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   task_role_arn           = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([
