@@ -9,3 +9,7 @@ variable "environment" {
 variable "cloudfront_distribution_arn" {
   type = string
 }
+
+variable "cloudfront_distribution_id" {
+  type = string
+}
