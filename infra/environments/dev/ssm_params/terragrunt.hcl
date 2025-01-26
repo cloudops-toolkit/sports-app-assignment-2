@@ -20,6 +20,7 @@ dependency "rds" {
   config_path = "../rds"
   mock_outputs = {
     cluster_endpoint = "mock-cluster.xxxxx.region.rds.amazonaws.com"
+    secrets_manager_secret_arn = "arn:aws:secretsmanager:region:account:secret:dummy-secret"
   }
 }
 
