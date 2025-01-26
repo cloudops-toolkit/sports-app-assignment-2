@@ -21,7 +21,7 @@ resource "aws_secretsmanager_secret_version" "aurora_credentials" {
     username = "dbadmin"
     password = random_password.master_password.result
     # dbname   = replace("${var.project}_${var.environment}", "-", "_")
-    dbname   = "${var.project}_db"
+    dbname   = "sportsinfra"
     port     = 5432
     engine   = "aurora-postgresql"
   })
