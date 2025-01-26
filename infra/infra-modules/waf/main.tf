@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 # WAFv2 Web ACL
 resource "aws_wafv2_web_acl" "main" {
   name        = "${var.project}-waf-${var.environment}"
@@ -62,6 +64,6 @@ resource "aws_wafv2_web_acl" "main" {
 # Web ACL Association with CloudFront
 resource "aws_wafv2_web_acl_association" "cloudfront" {
   # resource_arn = var.cloudfront_distribution_arn
-  resource_arn = "arn:aws:cloudfront::418272773173:distribution/${var.cloudfront_distribution_id}"
+  resource_arn = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${var.cloudfront_distribution_id}"
   web_acl_arn  = aws_wafv2_web_acl.main.arn
 }
