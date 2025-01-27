@@ -255,40 +255,40 @@ resource "aws_ecs_task_definition" "app" {
         }
       ]
       
-      secrets = [
-        {
-          name      = "SESSION_SECRET"
-          valueFrom = "/${var.project}-SESSION-SECRET-${var.environment}"
-        },
-        {
-          name      = "ENCODING_KEY"
-          valueFrom = "/${var.project}-ENCODING-KEY-${var.environment}"
-        },
-        {
-          name      = "REDIS_URL"
-          valueFrom = "/${var.project}-REDIS-URL-${var.environment}"
-        },
-        {
-          name      = "API_DB_NAME"
-          valueFrom = "/${var.project}-API_DB_NAME-${var.environment}"
-        },
-        {
-          name      = "API_DB_HOST"
-          valueFrom = "/${var.project}-API_DB_HOST-${var.environment}"
-        },
-        {
-          name      = "API_DB_USERNAME"
-          valueFrom = "/${var.project}-API_DB_USERNAME-${var.environment}"
-        },
-        {
-          name      = "API_DB_PASSWORD"
-          valueFrom = "/${var.project}-API_DB_PASSWORD-${var.environment}"
-        },
-        {
-          name      = "OPEN_AI_API_SECRET"
-          valueFrom = "/${var.project}-OPEN_AI_API_SECRET-${var.environment}"
-        }
-      ]
+      # secrets = [
+      #   {
+      #     name      = "SESSION_SECRET"
+      #     valueFrom = "/${var.project}-SESSION-SECRET-${var.environment}"
+      #   },
+      #   {
+      #     name      = "ENCODING_KEY"
+      #     valueFrom = "/${var.project}-ENCODING-KEY-${var.environment}"
+      #   },
+      #   {
+      #     name      = "REDIS_URL"
+      #     valueFrom = "/${var.project}-REDIS-URL-${var.environment}"
+      #   },
+      #   {
+      #     name      = "API_DB_NAME"
+      #     valueFrom = "/${var.project}-API_DB_NAME-${var.environment}"
+      #   },
+      #   {
+      #     name      = "API_DB_HOST"
+      #     valueFrom = "/${var.project}-API_DB_HOST-${var.environment}"
+      #   },
+      #   {
+      #     name      = "API_DB_USERNAME"
+      #     valueFrom = "/${var.project}-API_DB_USERNAME-${var.environment}"
+      #   },
+      #   {
+      #     name      = "API_DB_PASSWORD"
+      #     valueFrom = "/${var.project}-API_DB_PASSWORD-${var.environment}"
+      #   },
+      #   {
+      #     name      = "OPEN_AI_API_SECRET"
+      #     valueFrom = "/${var.project}-OPEN_AI_API_SECRET-${var.environment}"
+      #   }
+      # ]
       
       logConfiguration = {
         logDriver = "awslogs"
