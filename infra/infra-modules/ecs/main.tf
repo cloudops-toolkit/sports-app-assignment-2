@@ -193,17 +193,6 @@ resource "aws_ecs_task_definition" "app" {
         "-c", 
         "npm run db:mig && npm run db:seed && (node ./build/bin/server.js & node ./build/bin/consumers.js & wait)"
       ]
-      # command = [
-      #   "/bin/sh", 
-      #   "-c", 
-      #   "npm run db:mig && npm run db:seed && npm-run-all -p -r watch:node watch:consumers"
-      # ]
-
-      # command = [
-      #   "/bin/sh", 
-      #   "-c", 
-      #   "node ./build/bin/server.js"
-      # ]
       
       healthCheck = {
         command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/api/healthcheck || exit 1"]
@@ -211,7 +200,6 @@ resource "aws_ecs_task_definition" "app" {
         timeout     = 30
         retries     = 5
         startPeriod = 180
-        # startPeriod = 60
       }
       
       portMappings = [{
@@ -221,18 +209,6 @@ resource "aws_ecs_task_definition" "app" {
       }]
       
       environment = [
-        {
-          name  = "CRYPTO_SALT_SIZE"
-          value = "16"
-        },
-        {
-          name  = "CRYPTO_KEY_LEN"
-          value = "32"
-        },
-        {
-          name  = "CRYPTO_ITERATION_SIZE"
-          value = "310000"
-        },
         {
           name  = "API_DB_PORT"
           value = "5432"
@@ -262,15 +238,7 @@ resource "aws_ecs_task_definition" "app" {
           value = "us-east-1"
         },
         {
-          name  = "AWS_SQS_ENDPOINT"
-          value = "https://sqs.us-east-1.amazonaws.com"
-        },
-        {
           name  = "AWS_SDK_DEBUG"
-          value = "true"
-        },
-        {
-          name  = "AWS_SQS_DEBUG"
           value = "true"
         },
         {
@@ -282,25 +250,9 @@ resource "aws_ecs_task_definition" "app" {
           value = "*"
         },
         {
-          name  = "AWS_SQS_DLQ_URL"
-          value = "https://sqs.us-east-1.amazonaws.com/${data.aws_caller_identity.current.account_id}/imago_api___dev__dead_letter_queue"
-        },
-        {
-          name  = "AWS_SQS_QUEUE_URL"
-          value = "https://sqs.us-east-1.amazonaws.com/${data.aws_caller_identity.current.account_id}/imago_api___dev__background_jobs"
-        },
-        {
           name  = "NODE_DEBUG"
           value = "aws*"
         }
-        # {
-        #   name      = "OPEN_AI_API_SECRET"
-        #   value = "XXXX222"
-        # },
-        # {
-        #   name      = "OPEN_AI_URL"
-        #   value = "23343dfdfsf.com"
-        # }
       ]
       
       secrets = [
@@ -313,7 +265,7 @@ resource "aws_ecs_task_definition" "app" {
           valueFrom = "/${var.project}-ENCODING-KEY-${var.environment}"
         },
         {
-          name      = "IMAGO_REDIS_URL"
+          name      = "REDIS_URL"
           valueFrom = "/${var.project}-REDIS-URL-${var.environment}"
         },
         {
@@ -335,10 +287,6 @@ resource "aws_ecs_task_definition" "app" {
         {
           name      = "OPEN_AI_API_SECRET"
           valueFrom = "/${var.project}-OPEN_AI_API_SECRET-${var.environment}"
-        },
-        {
-          name      = "OPEN_AI_URL"
-          valueFrom = "/${var.project}-OPEN_AI_URL-${var.environment}"
         }
       ]
       
@@ -356,266 +304,6 @@ resource "aws_ecs_task_definition" "app" {
     }
   ])
 }
-
-#Originial
-# resource "aws_ecs_task_definition" "app" {
-#   family                   = "${var.project}-app-${var.environment}"
-#   network_mode             = "awsvpc"
-#   requires_compatibilities = ["EC2"]
-#   cpu                     = 1024
-#   memory                  = 2048
-#   execution_role_arn      = aws_iam_role.ecs_task_execution.arn
-#   task_role_arn           = aws_iam_role.ecs_task_role.arn
-
-#   container_definitions = jsonencode([
-#     {
-#       name  = "backend"
-#       image = "${var.ecr_repository_url}:backend-latest"
-#       memory    = 1536           # Increased
-#       memoryReservation = 1024   # Added soft limit
-#       # memory = 2048
-#       essential = true
-      
-#       # Include migrations in startup command
-#       command = ["/bin/sh", "-c", "npm run db:migrate && npm run start:dev"]
-      
-#       healthCheck: {
-#         # command: [
-#         #     "CMD-SHELL",
-#         #     "wget --no-verbose --tries=1 --spider http://localhost:8080/api/healthcheck || exit 1"
-#         # ],
-#         command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1"]
-#         interval = 30,
-#         timeout = 10,
-#         retries = 5,
-#         startPeriod = 180 
-#       }
-#       # healthCheck = {
-#       #   command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1"]
-#       #   interval    = 30
-#       #   timeout     = 5
-#       #   retries     = 3
-#       #   startPeriod = 90  # Increased to allow for migrations
-#       # }
-      
-#       portMappings = [{
-#         # containerPort = 3001
-#         containerPort = 8080
-#         hostPort = 8080 
-#         protocol     = "tcp"
-#       }]
-      
-#       environment = [
-#         {
-#           name  = "CRYPTO_SALT_SIZE"
-#           value = "16"
-#         },
-#         {
-#           name  = "CRYPTO_KEY_LEN"
-#           value = "32"
-#         },
-#         {
-#           name  = "CRYPTO_ITERATION_SIZE"
-#           value = "310000"
-#         },
-#         {
-#           name  = "API_DB_PORT"
-#           value = "5432"
-#         },
-#         {
-#           name  = "ENABLE_DB_LOGGING"
-#           value = "true"  # Enabled for troubleshooting
-#         },
-#         {
-#           name  = "NODE_ENV"
-#           value = var.environment
-#         },
-#         {
-#           name  = "DB_RETRY_ATTEMPTS"
-#           value = "5"
-#         },
-#         {
-#           name  = "DB_RETRY_DELAY"
-#           value = "5000"
-#         },
-#         {
-#           name =  "AWS_SDK_LOAD_CONFIG",
-#           value = "1"
-#         },
-#         {
-#           name = "AWS_REGION",
-#           value = "us-east-1"
-#         },
-#         {
-#           name  = "AWS_SQS_ENDPOINT",
-#           value = "https://sqs.us-east-1.amazonaws.com"
-#         },
-#         {
-#           name = "AWS_SDK_DEBUG",
-#           value = "true"
-#         },
-#         {
-#           name = "AWS_SQS_DEBUG",
-#           value = "true"
-#         },
-#         {
-#           name  = "NODE_OPTIONS"
-#           value = "--max-old-space-size=1536"
-#         },
-#         {
-#           name  = "DEBUG"
-#           value = "*"
-#         },
-#         {
-#           name = "AWS_SQS_DLQ_URL"
-#           value = "https://sqs.us-east-1.amazonaws.com/${data.aws_caller_identity.current.account_id}/imago_api___dev__dead_letter_queue"
-#         },
-#         {
-#           name = "AWS_SQS_QUEUE_URL"
-#           value = "https://sqs.us-east-1.amazonaws.com/${data.aws_caller_identity.current.account_id}/imago_api___dev__background_jobs"
-#         },
-#         {
-#           name = "NODE_DEBUG"
-#           value = "aws*"
-#         }
-#       ]
-      
-#       secrets = [
-#         {
-#           name      = "SESSION_SECRET"
-#           valueFrom = "/${var.project}-SESSION-SECRET-${var.environment}"
-#         },
-#         {
-#           name      = "ENCODING_KEY"
-#           valueFrom = "/${var.project}-ENCODING-KEY-${var.environment}"
-#         },
-#         {
-#           name      = "IMGO_REDIS_URL"
-#           valueFrom = "/${var.project}-REDIS-URL-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_NAME"
-#           valueFrom = "/${var.project}-API_DB_NAME-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_HOST"
-#           valueFrom = "/${var.project}-API_DB_HOST-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_USERNAME"
-#           valueFrom = "/${var.project}-API_DB_USERNAME-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_PASSWORD"
-#           valueFrom = "/${var.project}-API_DB_PASSWORD-${var.environment}"
-#         }
-#       ]
-      
-#       logConfiguration = {
-#         logDriver = "awslogs"
-#         options = {
-#           "awslogs-group"         = "/ecs/${var.project}-${var.environment}"
-#           "awslogs-region"        = data.aws_region.current.name
-#           "awslogs-stream-prefix" = "ecs"
-#           "mode"                  = "non-blocking"
-#           "max-buffer-size"       = "25m"
-#           "awslogs-datetime-format" = "%Y-%m-%d %H:%M:%S"
-#         }
-#       }
-#     }
-#   ])
-# }
-
-# resource "aws_ecs_task_definition" "app" {
-#   family                   = "${var.project}-app-${var.environment}"
-#   network_mode             = "awsvpc"
-#   requires_compatibilities = ["EC2"]
-#   cpu                     = 256
-#   memory                  = 450
-#   execution_role_arn      = aws_iam_role.ecs_task_execution.arn
-#   task_role_arn           = aws_iam_role.ecs_task_role.arn
-
-#   container_definitions = jsonencode([
-#     {
-#       name  = "backend"
-#       image = "${var.ecr_repository_url}:backend-latest"
-#       memory = 450
-#       portMappings = [{
-#         containerPort = 3001
-#         protocol     = "tcp"
-#       }]
-      
-#       environment = [
-#         {
-#           name  = "CRYPTO_SALT_SIZE"
-#           value = "16"
-#         },
-#         {
-#           name  = "CRYPTO_KEY_LEN"
-#           value = "32"
-#         },
-#         {
-#           name  = "CRYPTO_ITERATION_SIZE"
-#           value = "310000"
-#         },
-#         {
-#           name  = "API_DB_PORT"
-#           value = "5432"
-#         },
-#         {
-#           name  = "ENABLE_DB_LOGGING"
-#           value = "false"
-#         },
-#         {
-#           name  = "NODE_ENV"
-#           value = var.environment
-#         }
-#       ]
-      
-#       secrets = [
-#         {
-#           name      = "SESSION_SECRET"
-#           valueFrom = "/${var.project}-SESSION-SECRET-${var.environment}"
-#         },
-#         {
-#           name      = "ENCODING_KEY"
-#           valueFrom = "/${var.project}-ENCODING-KEY-${var.environment}"
-#         },
-#         {
-#           name      = "REDIS_URL"
-#           valueFrom = "/${var.project}-REDIS-URL-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_NAME"
-#           valueFrom = "/${var.project}-API_DB_NAME-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_HOST"
-#           valueFrom = "/${var.project}-API_DB_HOST-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_USERNAME"
-#           valueFrom = "/${var.project}-API_DB_USERNAME-${var.environment}"
-#         },
-#         {
-#           name      = "API_DB_PASSWORD"
-#           valueFrom = "/${var.project}-API_DB_PASSWORD-${var.environment}"
-#         }
-#       ]
-      
-#       logConfiguration = {
-#         logDriver = "awslogs"
-#         options = {
-#           "awslogs-group"         = "/ecs/${var.project}-${var.environment}"
-#           "awslogs-region"        = data.aws_region.current.name
-#           "awslogs-stream-prefix" = "ecs"
-#           "mode"                  = "non-blocking"
-#           "max-buffer-size"       = "25m"
-#         }
-#       }
-#     }
-#   ])
-# }
 
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.project}-${var.environment}"

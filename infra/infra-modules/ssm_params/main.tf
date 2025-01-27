@@ -30,10 +30,6 @@ resource "aws_ssm_parameter" "app_parameters" {
     "REDIS-URL"       = "redis://${var.redis_endpoint}:6379"
     "OPEN_AI_API_SECRET" = "XXXXXXX"
     "OPEN_AI_URL" = "example.com"
-    
-    # # AWS SES (if needed)
-    # "AWS_SES_ACCESS_KEY_ID" = var.ses_access_key_id
-    # "AWS_SES_SECRET_ACCESS_KEY" = var.ses_secret_access_key
   }
 
   name  = "${var.project}-${each.key}-${var.environment}"
