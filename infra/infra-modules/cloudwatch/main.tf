@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 # ECS Cluster Metrics Dashboard
 resource "aws_cloudwatch_dashboard" "ecs_dashboard" {
   dashboard_name = "${var.project}-ecs-dashboard-${var.environment}"
@@ -14,9 +16,15 @@ resource "aws_cloudwatch_dashboard" "ecs_dashboard" {
             ["AWS/ECS", "CPUUtilization", "ClusterName", var.ecs_cluster_name],
             ["AWS/ECS", "MemoryUtilization", "ClusterName", var.ecs_cluster_name]
           ],
-          title = "ECS Cluster Metrics",
-          view  = "timeSeries",
-          stacked = false
+          title    = "ECS Cluster Metrics",
+          view     = "timeSeries",
+          stacked  = false,
+          region   = data.aws_region.current.name,  # Add region
+          period   = 300,
+          stat     = "Average",
+          annotations = {
+            horizontal = []  # Add required annotations property
+          }
         }
       }
     ]
