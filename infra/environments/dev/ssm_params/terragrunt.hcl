@@ -34,7 +34,7 @@ inputs = {
   db_host        = dependency.rds.outputs.cluster_endpoint
   db_name        = "sportsinfra"
   # These should come from environment-specific config files
-  session_secret = include.root.locals.config.ssm_params.session_secret
-  encoding_key   = include.root.locals.config.ssm_params.encoding_key
+  session_secret = "XXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  encoding_key   = "XXXXXXXXXXXXXXXXXXXXX"
   db_secret_arn = dependency.rds.outputs.secrets_manager_secret_arn
 }
